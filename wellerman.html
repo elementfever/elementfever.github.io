@@ -1,0 +1,213 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Wellerman Sea Song</title><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap">
+<style>
+:root{
+  --sky:#ffcf8a; --sky2:#ffeccc; --sea:#1d7fa8; --deep:#0f4f73; --ink:#173048; --foam:#ffffff; --sail:#fff6e3; --hull:#9b4f2a;
+  --display:"Baloo 2","Arial Rounded MT Bold","Trebuchet MS",sans-serif;
+  color-scheme: light;
+}
+html,body{height:100%;overflow:hidden;background:var(--sea);color:var(--ink)}
+body{font-family:var(--display);touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+#lyric{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 10px);text-align:center;pointer-events:none;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  font-weight:800;font-size:clamp(16px,3.4vw,26px);color:var(--ink);text-wrap:balance;opacity:.85}
+#start{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;z-index:2;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background:linear-gradient(var(--sky) 0%,var(--sky2) 50%,var(--sea) 50%,var(--deep) 100%)}
+#start h1{margin:0;font-size:clamp(40px,10vw,90px);line-height:.95;font-weight:800;color:var(--sail);text-shadow:0 4px 0 var(--ink);text-wrap:balance}
+#go{font-family:var(--display);font-weight:800;font-size:clamp(30px,8vw,54px);color:var(--ink);background:var(--sail);
+  border:6px solid var(--ink);border-radius:999px;padding:14px 52px;cursor:pointer;box-shadow:0 8px 0 var(--ink);animation:bob 1.6s ease-in-out infinite}
+#go:active{transform:translateY(6px);box-shadow:0 2px 0 var(--ink)}
+#go:focus-visible{outline:5px dashed var(--foam);outline-offset:6px}
+#start p{margin:0;font-size:18px;font-weight:600;max-width:34ch;color:var(--foam)}
+#mute{position:fixed;z-index:1;right:calc(max(16px,env(safe-area-inset-right,0px)));bottom:calc(env(safe-area-inset-bottom,0px) + 16px);
+  font-family:var(--display);font-weight:800;font-size:16px;color:var(--ink);background:var(--sail);border:3px solid var(--ink);border-radius:999px;padding:8px 16px;cursor:pointer;opacity:.85}
+#mute:focus-visible{outline:3px dashed var(--foam);outline-offset:3px}
+@keyframes bob{50%{transform:translateY(-10px) rotate(-2deg)}}
+@media (prefers-reduced-motion:reduce){#go{animation:none}}
+</style>
+
+<canvas id="c"></canvas>
+<div id="lyric" hidden></div>
+<button id="mute" type="button" hidden aria-pressed="true">♪ Music on</button>
+<div id="start">
+  <h1>Wellerman<br>Sea Song</h1>
+  <button id="go" type="button">Set sail ⛵</button>
+  <p>The song plays along while you tap the sea for whales and fish, the sky for seagulls, and the ship for its horn. Sound up!</p>
+</div>
+
+<a href="./" style="position:fixed;z-index:9;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 16px);font-family:'Baloo 2','Arial Rounded MT Bold',sans-serif;font-weight:800;font-size:16px;color:#2b1d12;background:#fff6e3;border:3px solid #2b1d12;border-radius:999px;padding:6px 14px;text-decoration:none;opacity:.92">⌂ Home</a>
+<script>
+(()=>{
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),lyricEl=document.getElementById('lyric');
+let W,H,SEA;
+function resize(){const d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;SEA=H*.48;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0)}
+addEventListener('resize',resize);resize();
+
+const N={A3:220,C4:261.6,'C#4':277.2,D4:293.7,E4:329.6,F4:349.2,G4:392,A4:440,Bb4:466.2,C5:523.3,D5:587.3};
+const SONG=[
+ ['There once was a ship that put to sea',['A3','D4','D4','D4','F4','A4','A4','A4','A4']],
+ ['The name of the ship was the Billy of Tea',['Bb4','G4','G4','G4','Bb4','D5','D5','D5','C5','A4']],
+ ['The winds blew up, her bow dipped down',['A4','A4','A4','F4','A4','A4','A4','A4']],
+ ['Oh blow, my bully boys, blow',['E4','E4','E4','F4','E4','C#4','D4']],
+ ['Soon may the Wellerman come',['D5','D5','Bb4','C5','C5','C5','A4']],
+ ['To bring us sugar and tea and rum',['A4','G4','G4','G4','Bb4','Bb4','A4','G4','F4']],
+ ['One day, when the tonguin\' is done',['D5','D5','Bb4','C5','C5','C5','A4']],
+ ['We\'ll take our leave and go',['A4','G4','F4','E4','D4','D4']]
+];
+let line=0,idx=0,started=false,actx=null,party=0;
+const things=[],drops=[],gulls=[];
+const ship={x:.15,tx:.15,bounce:0};
+
+function synth(freq,t,dur){
+  if(!actx)return;const out=actx.createGain();out.gain.value=.55;out.connect(actx.destination);dur=Math.max(.3,dur);
+  const f=actx.createBiquadFilter();f.type='lowpass';f.frequency.value=1800;f.connect(out);
+  const g=actx.createGain();g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.02);g.gain.setValueAtTime(.12,t+dur*.6);g.gain.exponentialRampToValueAtTime(.0001,t+dur+.05);g.connect(f);
+  [1,1.006].forEach(m=>{const o=actx.createOscillator();o.type='sawtooth';o.frequency.value=freq*m;o.connect(g);o.start(t);o.stop(t+dur+.1)});
+}
+function bass(freq,t){
+  if(!actx)return;const o=actx.createOscillator(),g=actx.createGain();o.type='triangle';o.frequency.value=freq;
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.35,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.45);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.5);
+  const k=actx.createOscillator(),kg=actx.createGain();k.type='sine';k.frequency.setValueAtTime(120,t);k.frequency.exponentialRampToValueAtTime(45,t+.12);
+  kg.gain.setValueAtTime(.4,t);kg.gain.exponentialRampToValueAtTime(.0001,t+.18);k.connect(kg).connect(actx.destination);k.start(t);k.stop(t+.2);
+}
+function tapSound(kind){
+  if(!actx)return;const t=actx.currentTime,o=actx.createOscillator(),g=actx.createGain();o.type='sine';
+  const f={whale:[180,90,.7],fish:[300,900,.18],gull:[1200,1700,.15]}[kind]||[400,800,.2];
+  o.frequency.setValueAtTime(f[0],t);o.frequency.exponentialRampToValueAtTime(f[1],t+f[2]);
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.3,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+f[2]+.1);
+  o.connect(g).connect(actx.destination);o.start(t);o.stop(t+f[2]+.15);
+  if(kind!=='gull'){const n=actx.createBufferSource(),b=actx.createBuffer(1,actx.sampleRate*.25,actx.sampleRate),d=b.getChannelData(0);
+    for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2);
+    const bf=actx.createBiquadFilter();bf.type='lowpass';bf.frequency.value=1200;const ng=actx.createGain();ng.gain.value=.25;
+    n.buffer=b;n.connect(bf).connect(ng).connect(actx.destination);n.start(t)}
+}
+function horn(){if(!actx)return;const t=actx.currentTime,o=actx.createOscillator(),g=actx.createGain();o.type='triangle';o.frequency.value=147;
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.4,t+.05);g.gain.setValueAtTime(.4,t+.5);g.gain.exponentialRampToValueAtTime(.0001,t+.8);
+  o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.85)}
+
+const BEAT=.3,BASS=[73.4,98,73.4,110,58.3,98,58.3,110];
+let nextT=0,musicOn=true;const lineQueue=[];
+function scheduleAhead(){
+  if(!actx||!started||!musicOn)return;
+  if(nextT<actx.currentTime)nextT=actx.currentTime+.15;
+  while(nextT<actx.currentTime+.5){
+    const [txt,notes]=SONG[line],dur=idx===notes.length-1?BEAT*2:BEAT;
+    synth(N[notes[idx]],nextT,dur*.95);
+    if(idx%2===0)bass(BASS[line],nextT);
+    if(idx===0)lineQueue.push({t:nextT,txt,line});
+    nextT+=dur;idx++;
+    if(idx>=notes.length){idx=0;line++;if(line>=SONG.length){line=0;lineQueue.push({t:nextT,txt:'Hooray! Again!',line:-1});nextT+=BEAT*3}}
+  }
+}
+setInterval(scheduleAhead,100);
+function syncLyrics(){
+  if(!actx)return;
+  while(lineQueue.length&&lineQueue[0].t<=actx.currentTime){const q=lineQueue.shift();lyricEl.textContent=q.txt;
+    if(q.line<0){party=1;celebrate()}else ship.tx=.15+q.line/(SONG.length-1)*.65}
+}
+function celebrate(){
+  for(let i=0;i<4;i++)setTimeout(()=>addWhale(W*(.2+Math.random()*.6),SEA+60+Math.random()*(H-SEA-120)),i*250);
+  setTimeout(horn,200);
+}
+
+function addWhale(x,y){things.push({k:'whale',x,y,t:0,flip:Math.random()<.5,c:['#3a6ea5','#5a8fd6','#6a5acd'][Math.floor(Math.random()*3)]});}
+function addFish(x,y){things.push({k:'fish',x,y,t:0,dir:Math.random()<.5?-1:1,c:['#ff8a3d','#ffd23f','#ff5d8f','#4cd97b'][Math.floor(Math.random()*4)]});}
+function addGull(x,y){gulls.push({x,y,v:(Math.random()<.5?-1:1)*(1.5+Math.random()),t:0});}
+function splash(x,y,n=14){for(let i=0;i<n;i++){const a=-Math.PI/2+(Math.random()-.5)*1.6,s=3+Math.random()*5;drops.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:1})}}
+
+let silentEl=null;
+function silentWav(){const sr=8000,n=sr/2,b=new ArrayBuffer(44+n),v=new DataView(b),w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  w(0,'RIFF');v.setUint32(4,36+n,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,sr,true);v.setUint32(28,sr,true);v.setUint16(32,1,true);v.setUint16(34,8,true);w(36,'data');v.setUint32(40,n,true);
+  for(let i=0;i<n;i++)v.setUint8(44+i,128);let s='';new Uint8Array(b).forEach(c=>s+=String.fromCharCode(c));return 'data:audio/wav;base64,'+btoa(s)}
+function unlock(){
+  try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+  try{if(!silentEl){silentEl=new Audio(silentWav());silentEl.loop=true;silentEl.setAttribute('playsinline','');}silentEl.play().catch(()=>{})}catch(e){}
+  try{if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state!=='running')actx.resume();
+    const src=actx.createBufferSource();src.buffer=actx.createBuffer(1,1,22050);src.connect(actx.destination);src.start(0)}catch(e){}
+}
+document.getElementById('mute').addEventListener('click',e=>{
+  musicOn=!musicOn;unlock();const b=e.currentTarget;b.textContent=musicOn?'♪ Music on':'♪ Music off';b.setAttribute('aria-pressed',musicOn);
+  if(musicOn){nextT=0;scheduleAhead()}else lineQueue.length=0;
+});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&started)unlock()});
+
+cv.addEventListener('pointerdown',e=>{
+  if(!started)return;unlock();const x=e.clientX,y=e.clientY;
+  const sx=ship.x*W,sy=SEA;
+  if(Math.abs(x-sx)<90&&y>sy-150&&y<sy+40){ship.bounce=1;horn();return}
+  if(y>SEA){if(Math.random()<.5){addWhale(x,Math.max(SEA+50,y));tapSound('whale')}else{addFish(x,Math.max(SEA+50,y));tapSound('fish')}splash(x,Math.max(SEA+20,y-20),8)}
+  else{addGull(x,y);tapSound('gull')}
+});
+document.getElementById('go').addEventListener('click',()=>{
+  unlock();
+  started=true;document.getElementById('start').hidden=true;lyricEl.hidden=false;lyricEl.textContent='♪ ♪ ♪';
+  document.getElementById('mute').hidden=false;nextT=0;scheduleAhead();
+  addWhale(W*.7,SEA+90);horn();
+  try{navigator.wakeLock&&navigator.wakeLock.request('screen').catch(()=>{})}catch(e){}
+});
+
+function wave(y,amp,col,ph){ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(0,H);for(let x=0;x<=W+20;x+=20)ctx.lineTo(x,y+Math.sin(x*.025+ph)*amp);ctx.lineTo(W,H);ctx.fill()}
+function drawShip(x,y,tilt){
+  ctx.save();ctx.translate(x,y);ctx.rotate(tilt);
+  const s=Math.max(.8,Math.min(1.4,W/700));ctx.scale(s,s);
+  ctx.fillStyle='#173048';ctx.fillRect(-3,-120,6,115);
+  ctx.fillStyle='#fff6e3';ctx.beginPath();ctx.moveTo(4,-112);ctx.quadraticCurveTo(60,-70,4,-22);ctx.fill();
+  ctx.beginPath();ctx.moveTo(-4,-100);ctx.quadraticCurveTo(-48,-62,-4,-30);ctx.fill();
+  ctx.fillStyle='#e8453c';ctx.beginPath();ctx.moveTo(3,-120);ctx.lineTo(28,-112);ctx.lineTo(3,-104);ctx.fill();
+  ctx.fillStyle='#9b4f2a';ctx.beginPath();ctx.moveTo(-70,-12);ctx.lineTo(74,-12);ctx.lineTo(52,22);ctx.lineTo(-52,22);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#ffd23f';[-30,0,30].forEach(px=>{ctx.beginPath();ctx.arc(px,4,6,0,6.28);ctx.fill()});
+  ctx.restore();
+}
+function drawWhale(w){
+  const life=w.t<1?w.t:(w.t>4?Math.max(0,5-w.t):1),rise=(1-Math.min(1,life))*60;
+  ctx.save();ctx.translate(w.x,w.y+rise);if(w.flip)ctx.scale(-1,1);ctx.globalAlpha=Math.min(1,life*1.5);
+  ctx.fillStyle=w.c;ctx.beginPath();ctx.ellipse(0,0,70,38,0,Math.PI,0);ctx.lineTo(70,10);ctx.ellipse(0,10,70,14,0,0,Math.PI);ctx.fill();
+  ctx.beginPath();ctx.moveTo(-60,0);ctx.quadraticCurveTo(-90,-10,-105,-40);ctx.lineTo(-80,-28);ctx.lineTo(-90,-55);ctx.quadraticCurveTo(-70,-20,-55,-8);ctx.fill();
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(35,-12,8,0,6.28);ctx.fill();ctx.fillStyle='#173048';ctx.beginPath();ctx.arc(37,-12,4.5,0,6.28);ctx.fill();
+  ctx.strokeStyle='#173048';ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();ctx.arc(45,0,12,.3,1.4);ctx.stroke();
+  ctx.fillStyle='rgba(255,140,170,.6)';ctx.beginPath();ctx.arc(28,2,6,0,6.28);ctx.fill();
+  ctx.restore();
+  if(w.t>.8&&w.t<3&&Math.random()<.5)drops.push({x:w.x+(w.flip?-15:15),y:w.y+rise-38,vx:(Math.random()-.5)*2.5,vy:-5-Math.random()*3,life:1});
+}
+function drawFish(f){
+  const p=Math.min(1,f.t/1.6),x=f.x+f.dir*p*140,y=f.y-Math.sin(p*Math.PI)*140;
+  ctx.save();ctx.translate(x,y);ctx.rotate(f.dir*(p-.5)*1.6);if(f.dir<0)ctx.scale(-1,1);
+  ctx.fillStyle=f.c;ctx.beginPath();ctx.ellipse(0,0,28,16,0,0,6.28);ctx.fill();
+  ctx.beginPath();ctx.moveTo(-22,0);ctx.lineTo(-44,-16);ctx.lineTo(-44,16);ctx.fill();
+  ctx.fillStyle='#173048';ctx.beginPath();ctx.arc(14,-4,4,0,6.28);ctx.fill();ctx.restore();
+}
+
+let last=performance.now(),ph=0;
+function frame(now){
+  const dt=Math.min(3,(now-last)/16.67);last=now;ph+=.03*dt;syncLyrics();
+  const g=ctx.createLinearGradient(0,0,0,SEA);g.addColorStop(0,'#ffcf8a');g.addColorStop(1,'#ffeccc');ctx.fillStyle=g;ctx.fillRect(0,0,W,SEA+20);
+  ctx.fillStyle='#ffb347';ctx.beginPath();ctx.arc(W*.8,SEA*.55,Math.min(W,H)*.09,0,6.28);ctx.fill();
+  for(let i=gulls.length-1;i>=0;i--){const b=gulls[i];b.t+=dt;b.x+=b.v*dt;b.y+=Math.sin(b.t*.1)*.4;
+    ctx.strokeStyle='#173048';ctx.lineWidth=4;ctx.lineCap='round';const f=Math.sin(b.t*.25)*8;
+    ctx.beginPath();ctx.moveTo(b.x-24,b.y-f);ctx.quadraticCurveTo(b.x-10,b.y-12,b.x,b.y);ctx.quadraticCurveTo(b.x+10,b.y-12,b.x+24,b.y-f);ctx.stroke();
+    if(b.x<-60||b.x>W+60)gulls.splice(i,1)}
+  wave(SEA,8,'#2a93bd',ph);
+  ship.x+=(ship.tx-ship.x)*.04*dt;ship.bounce=Math.max(0,ship.bounce-.03*dt);
+  const sx=ship.x*W,bob=Math.sin(ph*1.3)*5-ship.bounce*25;
+  drawShip(sx,SEA+bob+6,Math.sin(ph)*.06);
+  wave(SEA+18,10,'#1d7fa8',ph*1.2+1);
+  for(let i=things.length-1;i>=0;i--){const o=things[i];o.t+=dt/60;
+    if(o.k==='whale'){drawWhale(o);if(o.t>5)things.splice(i,1)}else{drawFish(o);if(o.t>1.6){splash(o.f2x??o.x+o.dir*140,o.y,6);things.splice(i,1)}}}
+  wave(H-40,6,'#0f4f73',ph*.8+2);
+  ctx.fillStyle='#ffffff';
+  for(let i=drops.length-1;i>=0;i--){const d=drops[i];d.vy+=.25*dt;d.x+=d.vx*dt;d.y+=d.vy*dt;d.life-=.02*dt;
+    ctx.globalAlpha=Math.max(0,d.life);ctx.beginPath();ctx.arc(d.x,d.y,5,0,6.28);ctx.fill();if(d.life<=0)drops.splice(i,1)}
+  ctx.globalAlpha=1;
+  if(party>0){party-=.004*dt;ctx.fillStyle='#173048';ctx.font='800 40px sans-serif';ctx.textAlign='center';
+    for(let k=0;k<5;k++)ctx.fillText('♪',sx+Math.sin(ph*2+k)*60,SEA-150-((ph*40+k*40)%160))}
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>
